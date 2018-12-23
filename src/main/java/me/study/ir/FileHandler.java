@@ -37,32 +37,38 @@ public class FileHandler {
 			int starsCol;
 			int langCol;
 			int dateCol;
-			int startReviewCol;
 			String review;
 			int good = 0;
+			int startReviewCol = 1;
 			while ((line = br.readLine()) != null) {
 				if (count > 0) {
 					String[] split = line.split(SPLIT);
 					langCol = split.length-4;
 					starsCol = findStars(split);
-					startReviewCol = starsCol+5;
+					
 					dateCol = starsCol+1;
-					if (!split[1].equals(NA) && starsCol != -1) {
+					Language lang = Language.findLanguage(getLanguage(split[langCol]));
+					if (!split[1].equals(NA) && starsCol != -1 && lang != null) {
 						xml.append(DOCSTART);
 						review = "";
-						for (int i = startReviewCol; i < langCol; i++) {
+						for (int i = startReviewCol; i < starsCol; i++) {
 							if (i > 1) {
-								review += ",";
+								review += startReviewCol;
 							}
 							review += split[i];
 						}
+						String rev = replaceFormat(review);
 						xml.append(FIELDSTART + ID + FIELDSTART_2 + count + FIELDSEND);
-						xml.append(FIELDSTART + REVIEW + FIELDSTART_2 +  replaceFormat(review) + FIELDSEND);
+						xml.append(FIELDSTART + REVIEW + lang.toString() +  FIELDSTART_2 + rev + FIELDSEND);
 						xml.append(FIELDSTART + STARS + FIELDSTART_2 + split[starsCol] + FIELDSEND);
-						xml.append(FIELDSTART + LANGUAGE + FIELDSTART_2 + getLanguage(split[langCol]) + FIELDSEND);
+						xml.append(FIELDSTART + LANGUAGE + FIELDSTART_2 + lang.toString() + FIELDSEND);
 						xml.append(FIELDSTART + DATE + FIELDSTART_2 + (split[dateCol].length()==19? split[dateCol].replaceAll(" ", "T") + "Z":"2000-01-01T00:00:00Z") + FIELDSEND);
 						xml.append(DOCEND);
 						good++;
+					}else {
+						if(!getLanguage(split[langCol]).equals("NA") && !getLanguage(split[langCol]).equals("false")) {
+							System.out.println(getLanguage(split[langCol]));
+						}
 					}
 				}
 				count++;
